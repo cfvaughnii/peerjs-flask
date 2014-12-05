@@ -1,0 +1,175 @@
+{% extends "bootstrap/base.html" %}
+
+
+{% block title %}{{title}}{% endblock %}
+{% block head %}    
+    {{ super() }}
+    <script src="//code.jquery.com/jquery-1.11.0.min.js"></script> 
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap-theme.min.css">
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script> 
+    <script src="../static/opentok.js" type="text/javascript" ></script>
+    <script src="../static/steris.js" type="text/javascript" ></script>
+    <style>
+      #video_area {
+        position: absolute;
+        outline: blue thick;  
+        top: 50px;
+        left: 0%;
+        height: 80%;
+        width: 100%;
+      }
+      #OT_them_view {
+        position: absolute;
+        outline: blue thick;  
+        top: 0px;
+        left: 0px;
+        width: 640px;
+        height: 360px;
+      }
+      #OT_us_view {
+        position: absolute;
+        outline: blue thick;  
+        bottom: 0px;
+        left: 0px;
+        width: 8%;
+        height: 8%;
+      }
+    </style>
+{% endblock %}
+    
+{% block navbar %}
+<div class="navbar navbar-inverse" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+             <style type="text/css">.navbar-brand {margin-right: 20px;padding: 7px;}</style>
+            <a class="navbar-brand" href="#"><img alt="Brand" src="../static/steris_black.jpeg"></a>
+        </div>
+        <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+                <li>
+                      {% if g.user.is_authenticated() %}
+                        <div class="btn-group btn-group-xs" role="group" >
+                          <button id="logout_btn" class="btn btn-default navbar-btn">Logout</button>
+                        </div>
+                      {% endif %}
+                    <div class="btn-group btn-group-xs" role="group" aria-label="calls" id="calls">
+                      {% if g.user.nickname != "OR1" %}
+                        <button id="videoCallOR1" class="btn btn-default navbar-btn">OR1</button>
+                      {% endif %}
+                      {% if g.user.nickname != "OR2" %}
+                        <button id="videoCallOR2" class="btn btn-default navbar-btn">OR2</button>
+                      {% endif %}
+                      {% if g.user.nickname != "OR3" %}
+                        <button id="videoCallOR3" class="btn btn-default navbar-btn">OR3</button>
+                      {% endif %}
+                      {% if g.user.nickname != "OR4" %}
+                        <button id="videoCallOR4" class="btn btn-default navbar-btn">OR4</button>
+                      {% endif %}
+                    </div>
+                    <div class="btn-group btn-group-xs" role="group" aria-label="toggles" id="toggles">
+                      <button id="hangupCall" class="btn btn-default navbar-btn">Hangup Call</button>
+                      <button id="audioToggle" class="btn btn-default navbar-btn">Audio Toogle</button>
+                      <button id="videoToggle" class="btn btn-default navbar-btn">Video Toggle</button>
+                    </div>
+                </li>
+            </ul>
+           <ul class="nav navbar-nav navbar-right">
+                <p class="navbar-text">Signed in as {{user.nickname}}</p>                    
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}
+<body>
+    <div>Steris:
+        <a href="{{ url_for('index') }}">Home</a>
+        {% if g.user.is_authenticated() %}
+        | <a href="{{ url_for('logout') }}">Logout</a>
+        {% endif %}
+    </div>
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <ul>
+        {% for message in messages %}
+            <li>{{ message }} </li>
+        {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+    {% block content %}
+<div class="modal fade" id="basicModal" tabindex="-1" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+            
+            <h3 class="modal-title" id="myModalLabel">Call Request</h3>
+            </div>
+            <div class="modal-body">
+                <h5>Accept, Cancel, or 'Esc'</h5>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="acceptCall" >Accept</button>
+        </div>
+    </div>
+  </div>
+</div>
+<div class="container">
+    <div id="video_area">
+     <div id="OT_them_view"></div>
+      <div id="OT_us_view"></div>
+    </div>
+
+ </div>
+<script type="text/javascript" charset="utf-8">
+  var publisher_audio_state = true;
+  var publisher_video_state = true;
+  var subscriber_audio_state = true;
+  var subscriber_video_state = true;
+
+
+      $("#logout_btn").click(function () { 
+        url = "{{ url_for('logout') }}";
+        $(location).attr('href', url)
+      });
+      $("[id^=videoCall]").click(function () { 
+        console.log($(this).text());        
+        console.log($(this).attr('id'));        
+        videoCall("{{user.nickname}}", $(this).text());
+      });
+
+      $("#voiceCall").click(function () { 
+        voiceCall("{{user.nickname}}");
+      });
+
+      $("#toggles").hide();
+
+      $("#acceptCall").click(function () { 
+        acceptCall();
+        $("#basicModal").hide();
+      });
+
+      $("#hangupCall").click(function () { 
+        hangupCall();
+      });
+
+      $("#audioToggle").click(function () { 
+        audioToggle();
+      });
+
+      $("#videoToggle").click(function () { 
+        videoToggle();
+      });
+  initialize_session("{{user.nickname}}");
+</script>
+{% endblock %}</body>

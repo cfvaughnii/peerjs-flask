@@ -1,0 +1,18 @@
+<!-- extend base layout -->
+{% extends "base.html" %}
+
+{% block title %}Steris WebRTC Login{% endblock %}
+{% block content %}
+<script type="text/javascript">
+</script>
+<center><img alt="Brand" src="../static/steris_logo.jpeg"><br><br>
+<form action="" method="post" name="login">
+    {{ form.hidden_tag() }}
+    <p>
+        Please enter your Nickname:
+        {{ form.nickname(size=12) }}
+    </p>
+    <p>{{ form.remember_me }} Remember Me</p>
+    <p><input type="submit" value="Sign In"></p>
+</form>
+{% endblock %}
