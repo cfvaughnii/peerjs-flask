@@ -3,7 +3,7 @@ from flask import Flask
 from flask_bootstrap import Bootstrap
 from flask.ext.login import LoginManager
 from config import basedir
-from opentok_server.ot_server import *
+from peer_server.json_server import *
 
 app = Flask(__name__)
 app.config.from_object('config')
@@ -12,10 +12,8 @@ lm.init_app(app)
 lm.login_view = 'login'
 Bootstrap(app)
 users = [ 
-            {"nickname":"OR1"},
-            {"nickname":"OR2"},
-            {"nickname":"OR3"},
-            {"nickname":"OR4"}
+            {"nickname":"OR1","ip":"192.168.1.168"},
+            {"nickname":"OR2","ip":"192.168.1.175"}
         ]
 
 
@@ -48,7 +46,7 @@ def index():
 @jsonrpc.method('getSessionToken() -> list')
 def getSessionToken():
 	print "getSessionToken"
-	ret = OpenTokServer.generate_token()
+	ret = PeerServer.generate_token()
 	return [ret[0], ret[1], ret[2], ret[3]]
 
 

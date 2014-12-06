@@ -1,7 +1,7 @@
 {% extends "bootstrap/base.html" %}
 
 
-{% block title %}{{title}}{% endblock %}
+{% block title %}GetUserMedia{% endblock %}
 {% block head %}    
     {{ super() }}
     <script src="//code.jquery.com/jquery-1.11.0.min.js"></script> 
@@ -11,8 +11,6 @@
     <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap-theme.min.css">
     <!-- Latest compiled and minified JavaScript -->
     <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script> 
-    <script src="../static/opentok.js" type="text/javascript" ></script>
-    <script src="../static/steris.js" type="text/javascript" ></script>
     <style>
       #video_area {
         position: absolute;
@@ -142,34 +140,23 @@
         url = "{{ url_for('logout') }}";
         $(location).attr('href', url)
       });
-      $("[id^=videoCall]").click(function () { 
-        console.log($(this).text());        
-        console.log($(this).attr('id'));        
-        videoCall("{{user.nickname}}", $(this).text());
-      });
+</script>
+<video autoplay></video>
 
-      $("#voiceCall").click(function () { 
-        voiceCall("{{user.nickname}}");
-      });
+<script>
+  navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
 
-      $("#toggles").hide();
+  var constraints = { audio: false, video: true };
+  var video = document.querySelector("video");
 
-      $("#acceptCall").click(function () { 
-        acceptCall();
-        $("#basicModal").hide();
-      });
+  function successCallback(stream) {
+    video.src = window.URL.createObjectURL(stream);
+  }
 
-      $("#hangupCall").click(function () { 
-        hangupCall();
-      });
+  function errorCallback(error){
+    console.log("getUserMedia error: ", error);
+  }
 
-      $("#audioToggle").click(function () { 
-        audioToggle();
-      });
-
-      $("#videoToggle").click(function () { 
-        videoToggle();
-      });
-  initialize_session("{{user.nickname}}");
+  navigator.getUserMedia(constraints, successCallback, errorCallback);
 </script>
 {% endblock %}</body>
